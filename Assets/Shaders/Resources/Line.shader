@@ -6,11 +6,13 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
-		LOD 100
+   		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
 
 		Pass
 		{
+		    Cull Off
+	    	Blend SrcAlpha OneMinusSrcAlpha     
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -31,6 +33,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+			float _DistTotal;
 			
 			v2f vert (appdata v)
 			{
@@ -42,8 +45,9 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv);			
+				float2 uv = i.uv;
+				fixed4 col = tex2D(_MainTex, uv);	
+				col *= step(fmod(uv.x * _DistTotal, 1.0), 0.5);
 				return col;
 			}
 			ENDCG
